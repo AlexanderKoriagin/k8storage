@@ -1,0 +1,124 @@
+networks:
+  k8network:
+    driver: bridge
+
+services:
+  redis-source:
+    image: bitnami/redis:latest
+    container_name: k8-redis-source
+    environment:
+      - REDIS_PASSWORD=redisPassword
+    networks:
+      - k8network
+  redis-storage01:
+    image: bitnami/redis:latest
+    container_name: k8-redis-storage01
+    environment:
+      - REDIS_PASSWORD=redisPassword
+    networks:
+      - k8network
+  redis-storage02:
+    image: bitnami/redis:latest
+    container_name: k8-redis-storage02
+    environment:
+      - REDIS_PASSWORD=redisPassword
+    networks:
+      - k8network
+  redis-storage03:
+    image: bitnami/redis:latest
+    container_name: k8-redis-storage03
+    environment:
+      - REDIS_PASSWORD=redisPassword
+    networks:
+      - k8network
+  redis-storage04:
+    image: bitnami/redis:latest
+    container_name: k8-redis-storage04
+    environment:
+      - REDIS_PASSWORD=redisPassword
+    networks:
+      - k8network
+  redis-storage05:
+    image: bitnami/redis:latest
+    container_name: k8-redis-storage05
+    environment:
+      - REDIS_PASSWORD=redisPassword
+    networks:
+      - k8network
+  redis-storage06:
+    image: bitnami/redis:latest
+    container_name: k8-redis-storage06
+    environment:
+      - REDIS_PASSWORD=redisPassword
+    networks:
+      - k8network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: k8backend
+    ports:
+      - '58081:58081'
+    networks:
+      - k8network
+    stop_signal: SIGINT
+    entrypoint:
+      - /app/backend
+      - --sourceredisaddress
+      - k8-redis-source:6379
+      - --sourceredisauth
+      - redisPassword
+      - --storageredisaddress
+      - k8-redis-storage01:6379
+      - --storageredisauth
+      - redisPassword
+      - --storageredisaddress
+      - k8-redis-storage02:6379
+      - --storageredisauth
+      - redisPassword
+      - --storageredisaddress
+      - k8-redis-storage03:6379
+      - --storageredisauth
+      - redisPassword
+      - --storageredisaddress
+      - k8-redis-storage04:6379
+      - --storageredisauth
+      - redisPassword
+      - --storageredisaddress
+      - k8-redis-storage05:6379
+      - --storageredisauth
+      - redisPassword
+      - --storageredisaddress
+      - k8-redis-storage06:6379
+      - --storageredisauth
+      - redisPassword
+    depends_on:
+      - redis-source
+      - redis-storage01
+      - redis-storage02
+      - redis-storage03
+      - redis-storage04
+      - redis-storage05
+      - redis-storage06
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: k8frontend
+    ports:
+      - '58080:58080'
+    networks:
+      - k8network
+    stop_signal: SIGINT
+    entrypoint:
+      - /app/frontend
+      - --redisaddress
+      - k8-redis-source:6379
+      - --redisauth
+      - redisPassword
+      - --grpcbackendaddress
+      - k8backend:58081
+    depends_on:
+      - backend

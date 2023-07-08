@@ -1,0 +1,5 @@
+{
+  "version": "1.0.0",
+  "description": "file for k8 test exercise",
+  "structure": {"field0": "0", "field1": {"numbers": [0,1,2]}},
+}
